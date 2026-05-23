@@ -1,0 +1,10 @@
+[
+  {
+    "id": "aud-1779520844801-afwsl",
+    "timestamp": "2026-05-23T07:20:44.801Z",
+    "action": "LOGIN",
+    "performedBy": "admin",
+    "targetUserId": "admin",
+    "details": "Successful login as Admin"
+  }
+]

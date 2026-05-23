@@ -4,22 +4,36 @@ import { delayFromQuery } from '../middleware/delay';
 import { requireAdmin } from '../middleware/auth';
 import { AuthenticatedRequest, UserMutationPayload } from '../types';
 import { XmlStore } from '../storage/xml-store';
+import { AuditLog } from '../storage/audit-log';
+import { TaskStore } from '../storage/task-store';
 
-export function createAdminRoutes(store: XmlStore, authMiddleware: RequestHandler): Router {
+export function createAdminRoutes(
+  store: XmlStore,
+  authMiddleware: RequestHandler,
+  auditLog: AuditLog,
+  taskStore: TaskStore
+): Router {
   const router = Router();
 
   router.use('/admin', authMiddleware, requireAdmin);
 
-  router.get('/admin/users', delayFromQuery, async (_request: Request, response: Response, next) => {
+  // ── List users (with optional ?page & ?limit pagination) ──────────────────
+  router.get('/admin/users', delayFromQuery, async (request: Request, response: Response, next) => {
     try {
-      response.json({
-        users: await store.listUsers()
-      });
+      const allUsers = await store.listUsers();
+      const page  = Math.max(1, toInt(request.query['page'],  1));
+      const limit = Math.min(100, Math.max(1, toInt(request.query['limit'], 50)));
+      const total = allUsers.length;
+      const start = (page - 1) * limit;
+      const users = allUsers.slice(start, start + limit);
+
+      response.json({ users, total, page, limit, pages: Math.ceil(total / limit) });
     } catch (error) {
       next(error);
     }
   });
 
+  // ── Create user ───────────────────────────────────────────────────────────
   router.post('/admin/users', async (request: Request, response: Response, next) => {
     try {
       const payload = request.body as Partial<UserMutationPayload>;
@@ -30,13 +44,23 @@ export function createAdminRoutes(store: XmlStore, authMiddleware: RequestHandle
         return;
       }
 
+      const performer = (request as AuthenticatedRequest).user;
       const user = await store.createUser(payload as UserMutationPayload);
+
+      await auditLog.append({
+        action: 'CREATE',
+        performedBy: performer?.userId ?? 'unknown',
+        targetUserId: user.userId,
+        details: `Created user "${user.displayName}" with role ${user.role}`
+      });
+
       response.status(201).json({ user });
     } catch (error) {
       next(error);
     }
   });
 
+  // ── Update user ───────────────────────────────────────────────────────────
   router.put('/admin/users/:id', async (request: Request, response: Response, next) => {
     try {
       const id = getRouteId(request);
@@ -48,6 +72,7 @@ export function createAdminRoutes(store: XmlStore, authMiddleware: RequestHandle
         return;
       }
 
+      const performer = (request as AuthenticatedRequest).user;
       const user = await store.updateUser(id, payload as UserMutationPayload);
 
       if (!user) {
@@ -55,18 +80,26 @@ export function createAdminRoutes(store: XmlStore, authMiddleware: RequestHandle
         return;
       }
 
+      await auditLog.append({
+        action: 'UPDATE',
+        performedBy: performer?.userId ?? 'unknown',
+        targetUserId: user.userId,
+        details: `Updated user "${user.displayName}" — role: ${user.role}, active: ${String(user.active)}`
+      });
+
       response.json({ user });
     } catch (error) {
       next(error);
     }
   });
 
+  // ── Delete user ───────────────────────────────────────────────────────────
   router.delete('/admin/users/:id', async (request: Request, response: Response, next) => {
     try {
       const id = getRouteId(request);
-      const currentUser = (request as AuthenticatedRequest).user;
+      const performer = (request as AuthenticatedRequest).user;
 
-      if (currentUser?.id === id) {
+      if (performer?.id === id) {
         response.status(400).json({ message: 'The signed-in admin cannot delete their own account.' });
         return;
       }
@@ -78,7 +111,43 @@ export function createAdminRoutes(store: XmlStore, authMiddleware: RequestHandle
         return;
       }
 
+      await auditLog.append({
+        action: 'DELETE',
+        performedBy: performer?.userId ?? 'unknown',
+        targetUserId: id,
+        details: `Deleted user record ${id}`
+      });
+
       response.json({ deleted: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // ── Audit log ─────────────────────────────────────────────────────────────
+  router.get('/admin/audit', async (_request: Request, response: Response, next) => {
+    try {
+      const entries = await auditLog.readAll();
+      response.json({ entries: entries.slice().reverse(), total: entries.length });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // ── Employee profile (tasks + performance) ────────────────────────────────
+  router.get('/admin/users/:id/profile', delayFromQuery, async (request: Request, response: Response, next) => {
+    try {
+      const id = getRouteId(request);
+      const allUsers = await store.listUsers();
+      const user = allUsers.find((u) => u.id === id);
+
+      if (!user) {
+        response.status(404).json({ message: 'User not found.' });
+        return;
+      }
+
+      const profile = await taskStore.getEmployeeProfile(user, auditLog);
+      response.json(profile);
     } catch (error) {
       next(error);
     }
@@ -90,6 +159,11 @@ export function createAdminRoutes(store: XmlStore, authMiddleware: RequestHandle
 function getRouteId(request: Request): string {
   const id = request.params['id'];
   return Array.isArray(id) ? id[0] : id;
+}
+
+function toInt(value: unknown, fallback: number): number {
+  const n = parseInt(String(value ?? ''), 10);
+  return Number.isFinite(n) ? n : fallback;
 }
 
 function validateUserPayload(payload: Partial<UserMutationPayload>, passwordRequired: boolean): string | null {

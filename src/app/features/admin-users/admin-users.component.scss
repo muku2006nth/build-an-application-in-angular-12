@@ -227,6 +227,129 @@ p {
   padding: 0 10px;
 }
 
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--line);
+}
+
+.tab-btn {
+  min-height: 44px;
+  padding: 0 18px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  background: none;
+  color: var(--muted);
+  font-weight: 900;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+
+.tab-btn:hover {
+  color: var(--ink);
+}
+
+.tab-btn.active {
+  color: var(--berry);
+  border-bottom-color: var(--berry);
+}
+
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--soft);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.list-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 12px;
+  color: var(--ink);
+  background: var(--field);
+  outline: none;
+  font: inherit;
+  font-size: 0.88rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+  min-width: 180px;
+}
+
+.search-input:focus {
+  border-color: var(--teal);
+  box-shadow: var(--focus-ring);
+}
+
+.last-login {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.audit-section {
+  display: grid;
+  gap: 16px;
+  animation: page-in 320ms ease both;
+}
+
+.audit-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.audit-ts {
+  font-size: 0.82rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.audit-details {
+  font-size: 0.85rem;
+  color: var(--muted);
+  max-width: 320px;
+}
+
+.audit-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 5px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.audit-create  { background: color-mix(in srgb, var(--green) 14%, transparent); color: var(--green); }
+.audit-update  { background: var(--amber-soft); color: var(--amber); }
+.audit-delete  { background: var(--berry-soft); color: var(--berry); }
+.audit-login   { background: color-mix(in srgb, var(--blue) 12%, transparent); color: var(--blue); }
+
 @media (max-width: 1080px) {
   h1 {
     font-size: 3.2rem;
@@ -256,5 +379,17 @@ p {
   .form-actions,
   .delay-tools {
     grid-template-columns: 1fr;
+  }
+}
+
+.user-link {
+  color: var(--berry);
+  text-decoration: none;
+  transition: color 150ms ease, opacity 150ms ease;
+  display: inline-block;
+
+  &:hover {
+    opacity: 0.85;
+    text-decoration: underline;
   }
 }

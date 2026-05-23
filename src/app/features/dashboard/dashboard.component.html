@@ -38,6 +38,7 @@
     </div>
   </div>
 
+  <!-- Status tiles -->
   <div class="status-grid">
     <article class="status-tile">
       <span>User ID</span>
@@ -45,18 +46,27 @@
     </article>
     <article class="status-tile">
       <span>Role</span>
-      <strong>{{ profile?.role || '--' }}</strong>
+      <strong>
+        <span class="tag" [class.admin]="profile?.role === 'Admin'" [class.general]="profile?.role === 'General User'">
+          {{ profile?.role || '--' }}
+        </span>
+      </strong>
     </article>
     <article class="status-tile">
       <span>Department</span>
       <strong>{{ profile?.department || '--' }}</strong>
     </article>
     <article class="status-tile">
-      <span>Access</span>
+      <span>Access Level</span>
       <strong>{{ profile?.accessLevel || '--' }}</strong>
+    </article>
+    <article class="status-tile">
+      <span>Last Login</span>
+      <strong>{{ profile?.lastLoginAt ? (profile?.lastLoginAt | date: 'medium') : 'First session' }}</strong>
     </article>
   </div>
 
+  <!-- Async flow indicator -->
   <div class="flow-strip">
     <div class="flow-step done">
       <span></span>
@@ -77,35 +87,53 @@
   <div class="async-strip" *ngIf="loading">
     <div class="pulse"></div>
     <span>Waiting on delayed API response</span>
-    <strong>{{ elapsedMs }} ms</strong>
+    <strong>{{ elapsedMs }} ms elapsed</strong>
+    <app-spinner size="sm"></app-spinner>
   </div>
 
-  <div class="alert" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <!-- Access legend -->
+  <div class="access-legend" *ngIf="!loading && profile">
+    <div class="legend-icon" aria-hidden="true">🔐</div>
+    <div class="legend-copy">
+      <strong>{{ profile.role === 'Admin' ? 'Admin view — all records' : 'General User view — scoped records' }}</strong>
+      <p *ngIf="profile.role !== 'Admin'">You see records you own plus any marked <em>Public</em>. Admins see the full dataset.</p>
+      <p *ngIf="profile.role === 'Admin'">You have full read access to every record in the XML database regardless of ownership or access level.</p>
+    </div>
+  </div>
 
+  <!-- Records table -->
   <section class="records-section">
     <div class="section-heading">
       <div>
         <span class="eyebrow">Records</span>
         <h2>Accessible data</h2>
       </div>
-      <span class="tag">{{ records.length }} rows</span>
+      <div class="table-controls">
+        <input
+          type="search"
+          class="search-input"
+          placeholder="Filter records…"
+          (input)="onFilterChange($event)"
+          aria-label="Filter records">
+        <span class="tag">{{ filteredRecords.length }} / {{ records.length }} rows</span>
+      </div>
     </div>
 
     <div class="table-wrap" *ngIf="!loading; else loadingRows">
       <table>
         <thead>
           <tr>
-            <th>Record</th>
-            <th>Category</th>
-            <th>Owner</th>
+            <th class="sortable" (click)="sortBy('title')">Record {{ sortIcon('title') }}</th>
+            <th class="sortable" (click)="sortBy('category')">Category {{ sortIcon('category') }}</th>
+            <th class="sortable" (click)="sortBy('ownerName')">Owner {{ sortIcon('ownerName') }}</th>
             <th>Access Level</th>
-            <th>Status</th>
+            <th class="sortable" (click)="sortBy('status')">Status {{ sortIcon('status') }}</th>
             <th>Sensitivity</th>
-            <th>Updated</th>
+            <th class="sortable" (click)="sortBy('updatedAt')">Updated {{ sortIcon('updatedAt') }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let record of records; trackBy: trackRecord" class="data-row">
+          <tr *ngFor="let record of filteredRecords; trackBy: trackRecord" class="data-row">
             <td>
               <strong>{{ record.title }}</strong>
               <span class="record-id">{{ record.id }}</span>
@@ -116,6 +144,9 @@
             <td>{{ record.status }}</td>
             <td>{{ record.sensitivity }}</td>
             <td>{{ record.updatedAt | date: 'mediumDate' }}</td>
+          </tr>
+          <tr *ngIf="filteredRecords.length === 0">
+            <td colspan="7" class="empty-state">No records match your filter.</td>
           </tr>
         </tbody>
       </table>
@@ -139,6 +170,82 @@
             <tr *ngFor="let row of skeletonRows">
               <td colspan="7">
                 <span class="skeleton-line" [style.width.%]="76 + row * 4"></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ng-template>
+  </section>
+
+  <!-- User/Employees section for the reviewer -->
+  <section class="users-section" *ngIf="profile?.role === 'Admin'">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Reviewer Quick-Access</span>
+        <h2>User directory</h2>
+        <p class="section-desc">Click any employee name below to immediately test the new **Employee Performance & Task Profile** feature.</p>
+      </div>
+    </div>
+
+    <div class="table-wrap" *ngIf="!loadingUsers; else loadingUsersTemplate">
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Role</th>
+            <th>Department</th>
+            <th>Access Level</th>
+            <th>Last Login</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of users; trackBy: trackUser" class="data-row">
+            <td>
+              <a [routerLink]="['/admin/users', u.id]" class="user-link">
+                <strong>{{ u.displayName }}</strong>
+              </a>
+              <span class="user-id">{{ u.userId }}</span>
+            </td>
+            <td>
+              <span class="tag" [class.admin]="u.role === 'Admin'" [class.general]="u.role === 'General User'">
+                {{ u.role }}
+              </span>
+            </td>
+            <td>{{ u.department }}</td>
+            <td>{{ u.accessLevel }}</td>
+            <td>
+              <span class="last-login">
+                {{ u.lastLoginAt ? (u.lastLoginAt | date: 'medium') : 'Never' }}
+              </span>
+            </td>
+            <td>
+              <span class="status-dot" [class.off]="!u.active"></span>
+              {{ u.active ? 'Active' : 'Inactive' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #loadingUsersTemplate>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Role</th>
+              <th>Department</th>
+              <th>Access Level</th>
+              <th>Last Login</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of skeletonRows">
+              <td colspan="6">
+                <span class="skeleton-line" [style.width.%]="80 - row * 3"></span>
               </td>
             </tr>
           </tbody>

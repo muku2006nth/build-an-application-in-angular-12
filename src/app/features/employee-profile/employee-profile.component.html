@@ -1,0 +1,276 @@
+<section class="profile-page" *ngIf="!loading; else skeleton">
+  <div *ngIf="profile as p">
+
+    <!-- ── Hero header ───────────────────────────────────────────────────── -->
+    <div class="profile-hero">
+      <button class="back-btn" type="button" (click)="goBack()">
+        <span class="back-arrow">←</span> Back to Users
+      </button>
+
+      <div class="hero-inner">
+        <div class="avatar" [class.admin]="p.user.role === 'Admin'" aria-hidden="true">
+          {{ p.user.displayName.charAt(0).toUpperCase() }}
+        </div>
+
+        <div class="hero-info">
+          <span class="eyebrow">Employee Profile</span>
+          <h1>{{ p.user.displayName }}</h1>
+          <div class="hero-meta">
+            <span class="tag" [class.admin]="p.user.role === 'Admin'" [class.general]="p.user.role === 'General User'">
+              {{ p.user.role }}
+            </span>
+            <span class="meta-item">📁 {{ p.user.department }}</span>
+            <span class="meta-item">🆔 {{ p.user.userId }}</span>
+            <span class="meta-item">🔐 {{ p.user.accessLevel }}</span>
+          </div>
+          <div class="hero-status">
+            <span class="status-pill" [class.active]="p.user.active" [class.inactive]="!p.user.active">
+              <span class="status-dot"></span>
+              {{ p.user.active ? 'Active' : 'Inactive' }}
+            </span>
+            <span class="meta-item" *ngIf="p.user.lastLoginAt">
+              Last login: {{ p.user.lastLoginAt | date: 'mediumDate' }}
+            </span>
+            <span class="meta-item">
+              Member since: {{ p.user.createdAt | date: 'mediumDate' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Performance score ring -->
+        <div class="score-ring" [class]="scoreClass(stats?.avgScore)" [attr.title]="'Average task quality score: ' + (stats?.avgScore ?? 0)">
+          <svg viewBox="0 0 64 64" class="ring-svg" aria-hidden="true">
+            <circle cx="32" cy="32" r="26" class="ring-bg"/>
+            <circle cx="32" cy="32" r="26" class="ring-fill"
+              [style.stroke-dasharray]="163"
+              [style.stroke-dashoffset]="163 - (163 * (stats?.avgScore ?? 0) / 100)"/>
+          </svg>
+          <div class="ring-label">
+            <strong>{{ stats?.avgScore ?? 0 }}</strong>
+            <span>Avg score</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── KPI cards ──────────────────────────────────────────────────────── -->
+    <div class="kpi-grid" *ngIf="stats as s">
+      <article class="kpi-card kpi-total">
+        <span class="kpi-icon">📋</span>
+        <div class="kpi-body">
+          <span class="kpi-label">Total Tasks</span>
+          <strong class="kpi-value">{{ s.totalTasks }}</strong>
+        </div>
+      </article>
+
+      <article class="kpi-card kpi-completed">
+        <span class="kpi-icon">✅</span>
+        <div class="kpi-body">
+          <span class="kpi-label">Completed</span>
+          <strong class="kpi-value">{{ s.completed }}</strong>
+        </div>
+      </article>
+
+      <article class="kpi-card kpi-progress">
+        <span class="kpi-icon">⚙️</span>
+        <div class="kpi-body">
+          <span class="kpi-label">In Progress</span>
+          <strong class="kpi-value">{{ s.inProgress }}</strong>
+        </div>
+      </article>
+
+      <article class="kpi-card kpi-overdue" [class.highlighted]="s.overdue > 0">
+        <span class="kpi-icon">⚠️</span>
+        <div class="kpi-body">
+          <span class="kpi-label">Overdue</span>
+          <strong class="kpi-value">{{ s.overdue }}</strong>
+        </div>
+      </article>
+
+      <article class="kpi-card kpi-rate">
+        <span class="kpi-icon">🎯</span>
+        <div class="kpi-body">
+          <span class="kpi-label">Completion Rate</span>
+          <strong class="kpi-value">{{ s.completionRate }}%</strong>
+        </div>
+      </article>
+
+      <article class="kpi-card kpi-ontime">
+        <span class="kpi-icon">⏱️</span>
+        <div class="kpi-body">
+          <span class="kpi-label">On-Time Rate</span>
+          <strong class="kpi-value">{{ s.onTimeRate }}%</strong>
+        </div>
+      </article>
+
+      <article class="kpi-card kpi-streak">
+        <span class="kpi-icon">🔥</span>
+        <div class="kpi-body">
+          <span class="kpi-label">Current Streak</span>
+          <strong class="kpi-value">{{ s.streak }} tasks</strong>
+        </div>
+      </article>
+
+      <article class="kpi-card kpi-score">
+        <span class="kpi-icon">⭐</span>
+        <div class="kpi-body">
+          <span class="kpi-label">Avg Quality Score</span>
+          <strong class="kpi-value">{{ s.avgScore }} / 100</strong>
+        </div>
+      </article>
+    </div>
+
+    <!-- ── Progress bars ─────────────────────────────────────────────────── -->
+    <div class="progress-section" *ngIf="stats as s">
+      <div class="progress-row">
+        <span>Completion Rate</span>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill fill-teal" [style.width.%]="s.completionRate"></div>
+        </div>
+        <span class="progress-pct">{{ s.completionRate }}%</span>
+      </div>
+      <div class="progress-row">
+        <span>On-Time Delivery</span>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill fill-green" [style.width.%]="s.onTimeRate"></div>
+        </div>
+        <span class="progress-pct">{{ s.onTimeRate }}%</span>
+      </div>
+      <div class="progress-row">
+        <span>Quality Score</span>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill fill-blue" [style.width.%]="s.avgScore"></div>
+        </div>
+        <span class="progress-pct">{{ s.avgScore }}/100</span>
+      </div>
+    </div>
+
+    <!-- ── Task History ───────────────────────────────────────────────────── -->
+    <section class="tasks-section">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Task History</span>
+          <h2>All assigned tasks</h2>
+        </div>
+        <div class="task-controls">
+          <input
+            type="search"
+            class="search-input"
+            placeholder="Search tasks…"
+            (input)="onFilterText($event)"
+            aria-label="Search tasks">
+          <div class="select-field">
+            <select (change)="onFilterStatus($event)" aria-label="Filter by status">
+              <option *ngFor="let s of statusOptions" [value]="s">
+                {{ s || 'All statuses' }}
+              </option>
+            </select>
+            <span class="select-arrow" aria-hidden="true"></span>
+          </div>
+          <button class="btn secondary sort-btn" type="button" (click)="toggleSort()">
+            Due {{ sortAsc ? '↑ Soonest' : '↓ Latest' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrap" *ngIf="filteredTasks.length; else emptyTasks">
+        <table>
+          <thead>
+            <tr>
+              <th>Task</th>
+              <th>Category</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Due Date</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let task of filteredTasks; trackBy: trackTask" class="task-row">
+              <td class="task-title-cell">
+                <strong>{{ task.title }}</strong>
+                <span class="task-desc">{{ task.description }}</span>
+              </td>
+              <td>
+                <span class="category-badge">{{ task.category }}</span>
+              </td>
+              <td>
+                <span class="priority-badge" [class]="priorityClass(task.priority)">
+                  {{ task.priority }}
+                </span>
+              </td>
+              <td>
+                <span class="status-badge" [class]="statusClass(task.status)">
+                  {{ task.status }}
+                </span>
+              </td>
+              <td class="due-cell">
+                <span [class.overdue-date]="task.status === 'Overdue'">
+                  {{ task.dueDate | date: 'mediumDate' }}
+                </span>
+                <span class="completed-on" *ngIf="task.completedAt">
+                  ✓ {{ task.completedAt | date: 'mediumDate' }}
+                </span>
+              </td>
+              <td>
+                <span *ngIf="task.score !== undefined" class="score-chip" [class]="scoreClass(task.score)">
+                  {{ task.score }}
+                </span>
+                <span *ngIf="task.score === undefined" class="muted">—</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #emptyTasks>
+        <div class="empty-state">No tasks match your filter.</div>
+      </ng-template>
+    </section>
+
+    <!-- ── Recent Activity ───────────────────────────────────────────────── -->
+    <section class="activity-section" *ngIf="p.recentActivity?.length">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Audit Trail</span>
+          <h2>Recent activity</h2>
+        </div>
+      </div>
+
+      <div class="activity-timeline">
+        <div class="timeline-item" *ngFor="let item of p.recentActivity; trackBy: trackActivity">
+          <div class="timeline-dot" [class]="'dot-' + item.action.toLowerCase()"></div>
+          <div class="timeline-body">
+            <div class="timeline-header">
+              <span class="timeline-action">{{ item.action }}</span>
+              <span class="timeline-ts">{{ item.timestamp | date: 'medium' }}</span>
+            </div>
+            <p class="timeline-detail">{{ item.details }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</section>
+
+<ng-template #skeleton>
+  <section class="profile-page">
+    <div class="skeleton-hero">
+      <div class="skeleton-avatar sk"></div>
+      <div class="skeleton-lines">
+        <div class="sk sk-line" style="width: 60%"></div>
+        <div class="sk sk-line" style="width: 40%"></div>
+        <div class="sk sk-line" style="width: 30%"></div>
+      </div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card sk" *ngFor="let i of [1,2,3,4,5,6,7,8]" style="height: 90px"></div>
+    </div>
+    <div class="table-wrap">
+      <table><tbody>
+        <tr *ngFor="let i of [1,2,3,4,5]"><td colspan="6"><span class="skeleton-line sk" style="width: 100%"></span></td></tr>
+      </tbody></table>
+    </div>
+  </section>
+</ng-template>

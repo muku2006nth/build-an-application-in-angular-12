@@ -67,3 +67,47 @@ export interface TokenPayload {
 export interface AuthenticatedRequest extends Request {
   user?: PublicUser;
 }
+
+export type TaskStatus = 'Completed' | 'In Progress' | 'Pending' | 'Overdue' | 'Cancelled';
+export type TaskPriority = 'Critical' | 'High' | 'Medium' | 'Low';
+
+export interface TaskRecord {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  assignedUserId: string;
+  assignedByUserId: string;
+  dueDate: string;
+  completedAt?: string;
+  score?: number;          // 1-100 quality score for completed tasks
+  createdAt: string;
+}
+
+export interface PerformanceStats {
+  totalTasks: number;
+  completed: number;
+  inProgress: number;
+  pending: number;
+  overdue: number;
+  cancelled: number;
+  onTimeRate: number;      // percentage 0-100
+  avgScore: number;        // average quality score 0-100
+  completionRate: number;  // percentage 0-100
+  streak: number;          // consecutive on-time completions
+}
+
+export interface EmployeeProfile {
+  user: PublicUser;
+  stats: PerformanceStats;
+  tasks: TaskRecord[];
+  recentActivity: AuditSummary[];
+}
+
+export interface AuditSummary {
+  timestamp: string;
+  action: string;
+  details: string;
+}

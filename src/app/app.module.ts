@@ -9,7 +9,10 @@ import { AuthInterceptor } from './core/services/auth.interceptor';
 import { AppLoadService } from './core/services/app-load.service';
 import { AdminUsersComponent } from './features/admin-users/admin-users.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
+import { EmployeeProfileComponent } from './features/employee-profile/employee-profile.component';
 import { LoginComponent } from './features/login/login.component';
+import { NotFoundComponent } from './features/not-found/not-found.component';
+import { SharedModule } from './shared/shared.module';
 
 export function initializeApplication(appLoadService: AppLoadService): () => Promise<void> {
   return () => appLoadService.load();
@@ -20,13 +23,16 @@ export function initializeApplication(appLoadService: AppLoadService): () => Pro
     AppComponent,
     LoginComponent,
     DashboardComponent,
-    AdminUsersComponent
+    AdminUsersComponent,
+    EmployeeProfileComponent,
+    NotFoundComponent
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
+    SharedModule,
     AppRoutingModule
   ],
   providers: [

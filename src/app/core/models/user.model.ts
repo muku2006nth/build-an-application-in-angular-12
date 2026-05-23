@@ -52,3 +52,58 @@ export interface UserMutation {
   accessLevel: string;
   active: boolean;
 }
+
+export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'LOGIN';
+
+export interface AuditEntry {
+  id: string;
+  timestamp: string;
+  action: AuditAction;
+  performedBy: string;
+  targetUserId: string;
+  details: string;
+}
+
+export type TaskStatus   = 'Completed' | 'In Progress' | 'Pending' | 'Overdue' | 'Cancelled';
+export type TaskPriority = 'Critical'  | 'High'        | 'Medium'  | 'Low';
+
+export interface TaskRecord {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  assignedUserId: string;
+  assignedByUserId: string;
+  dueDate: string;
+  completedAt?: string;
+  score?: number;
+  createdAt: string;
+}
+
+export interface PerformanceStats {
+  totalTasks: number;
+  completed: number;
+  inProgress: number;
+  pending: number;
+  overdue: number;
+  cancelled: number;
+  onTimeRate: number;
+  avgScore: number;
+  completionRate: number;
+  streak: number;
+}
+
+export interface ActivityEntry {
+  timestamp: string;
+  action: string;
+  details: string;
+}
+
+export interface EmployeeProfile {
+  user: ManagedUser;
+  stats: PerformanceStats;
+  tasks: TaskRecord[];
+  recentActivity: ActivityEntry[];
+}

@@ -4,12 +4,13 @@
   grid-template-columns: minmax(340px, 35vw) minmax(560px, 1fr);
   background: var(--soft);
   animation: page-in 420ms ease both;
+  position: relative;
 }
 
 .login-theme-switch {
-  position: fixed;
-  top: 22px;
-  right: 22px;
+  position: absolute;
+  top: 24px;
+  right: 24px;
   z-index: 5;
 }
 

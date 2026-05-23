@@ -3,7 +3,7 @@
     <div>
       <span class="eyebrow">Admin console</span>
       <h1>User management</h1>
-      <p>Maintain dummy XML users, roles, departments, and active access.</p>
+      <p>Maintain XML users, roles, departments, and access. View the audit log for all changes.</p>
 
       <div class="admin-stats">
         <span>{{ users.length }} accounts</span>
@@ -27,9 +27,32 @@
     </div>
   </div>
 
-  <div class="alert" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <!-- Tab navigation -->
+  <div class="tab-bar" role="tablist">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'users'"
+      type="button"
+      role="tab"
+      id="tab-users"
+      [attr.aria-selected]="activeTab === 'users'"
+      (click)="setTab('users')">
+      Users <span class="tab-count">{{ users.length }}</span>
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'audit'"
+      type="button"
+      role="tab"
+      id="tab-audit"
+      [attr.aria-selected]="activeTab === 'audit'"
+      (click)="setTab('audit')">
+      Audit Log <span class="tab-count">{{ auditEntries.length }}</span>
+    </button>
+  </div>
 
-  <div class="admin-layout">
+  <!-- ── Users tab ─────────────────────────────────────────────────────── -->
+  <div *ngIf="activeTab === 'users'" class="admin-layout">
     <form class="user-form panel" [formGroup]="form" (ngSubmit)="saveUser()">
       <div class="form-heading">
         <span class="eyebrow">{{ editingUser ? 'Edit user' : 'New user' }}</span>
@@ -79,7 +102,7 @@
       </label>
 
       <div class="form-actions">
-        <button class="btn" type="submit" [disabled]="saving">{{ saving ? 'Saving...' : 'Save user' }}</button>
+        <button class="btn" type="submit" [disabled]="saving">{{ saving ? 'Saving…' : 'Save user' }}</button>
         <button class="btn secondary" type="button" (click)="cancelEdit()">Clear</button>
       </div>
     </form>
@@ -90,10 +113,21 @@
           <span class="eyebrow">Database users</span>
           <h2>{{ users.length }} accounts</h2>
         </div>
-        <span class="tag" *ngIf="loading">Loading</span>
+        <div class="list-controls">
+          <input
+            type="search"
+            class="search-input"
+            placeholder="Filter users…"
+            (input)="onFilterChange($event)"
+            aria-label="Filter users">
+          <span class="tag" *ngIf="loading">
+            <app-spinner size="sm"></app-spinner>
+            Loading
+          </span>
+        </div>
       </div>
 
-      <div class="table-wrap" *ngIf="users.length; else emptyUsers">
+      <div class="table-wrap" *ngIf="filteredUsers.length; else emptyUsers">
         <table>
           <thead>
             <tr>
@@ -101,14 +135,17 @@
               <th>Role</th>
               <th>Department</th>
               <th>Access</th>
+              <th>Last Login</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let user of users; trackBy: trackUser">
+            <tr *ngFor="let user of filteredUsers; trackBy: trackUser">
               <td>
-                <strong>{{ user.displayName }}</strong>
+                <a [routerLink]="['/admin/users', user.id]" class="user-link">
+                  <strong>{{ user.displayName }}</strong>
+                </a>
                 <span class="user-id">{{ user.userId }}</span>
               </td>
               <td>
@@ -119,13 +156,18 @@
               <td>{{ user.department }}</td>
               <td>{{ user.accessLevel }}</td>
               <td>
+                <span class="last-login">
+                  {{ user.lastLoginAt ? (user.lastLoginAt | date: 'mediumDate') : 'Never' }}
+                </span>
+              </td>
+              <td>
                 <span class="status-dot" [class.off]="!user.active"></span>
                 {{ user.active ? 'Active' : 'Inactive' }}
               </td>
               <td>
                 <div class="row-actions">
                   <button class="btn secondary" type="button" (click)="editUser(user)">Edit</button>
-                  <button class="btn danger" type="button" (click)="deleteUser(user)" [disabled]="isCurrentUser(user)">Delete</button>
+                  <button class="btn danger" type="button" (click)="requestDelete(user)" [disabled]="isCurrentUser(user)">Delete</button>
                 </div>
               </td>
             </tr>
@@ -134,8 +176,65 @@
       </div>
 
       <ng-template #emptyUsers>
-        <div class="empty-state">{{ loading ? 'Loading users...' : 'No users found.' }}</div>
+        <div class="empty-state">{{ loading ? 'Loading users…' : 'No users match your filter.' }}</div>
       </ng-template>
     </section>
   </div>
+
+  <!-- ── Audit Log tab ──────────────────────────────────────────────────── -->
+  <div *ngIf="activeTab === 'audit'" class="audit-section">
+    <div class="list-heading">
+      <div>
+        <span class="eyebrow">Change history</span>
+        <h2>{{ auditEntries.length }} events</h2>
+      </div>
+      <button class="btn secondary" type="button" (click)="loadAudit()" [disabled]="loadingAudit">Refresh</button>
+    </div>
+
+    <div *ngIf="loadingAudit" class="audit-loading">
+      <app-spinner></app-spinner>
+      <span>Loading audit log…</span>
+    </div>
+
+    <div class="table-wrap" *ngIf="!loadingAudit && auditEntries.length">
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Action</th>
+            <th>Performed By</th>
+            <th>Target User</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let entry of auditEntries; trackBy: trackAudit">
+            <td class="audit-ts">{{ entry.timestamp | date: 'medium' }}</td>
+            <td>
+              <span class="audit-badge" [class]="'audit-badge audit-' + entry.action.toLowerCase()">
+                {{ entry.action }}
+              </span>
+            </td>
+            <td>{{ entry.performedBy }}</td>
+            <td>{{ entry.targetUserId }}</td>
+            <td class="audit-details">{{ entry.details }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="empty-state" *ngIf="!loadingAudit && auditEntries.length === 0">
+      No audit events recorded yet. Create, update, or delete a user to generate entries.
+    </div>
+  </div>
 </section>
+
+<!-- Confirm delete dialog -->
+<app-confirm-dialog
+  [visible]="!!pendingDeleteUser"
+  [title]="'Remove user'"
+  [message]="'Are you sure you want to remove ' + (pendingDeleteUser?.displayName ?? '') + '? This cannot be undone.'"
+  confirmLabel="Remove"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()">
+</app-confirm-dialog>

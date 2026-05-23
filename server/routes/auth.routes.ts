@@ -4,8 +4,13 @@ import { delayFromQuery } from '../middleware/delay';
 import { signToken } from '../middleware/auth';
 import { AuthenticatedRequest, LoginPayload } from '../types';
 import { XmlStore } from '../storage/xml-store';
+import { AuditLog } from '../storage/audit-log';
 
-export function createAuthRoutes(store: XmlStore, authMiddleware: RequestHandler): Router {
+export function createAuthRoutes(
+  store: XmlStore,
+  authMiddleware: RequestHandler,
+  auditLog: AuditLog
+): Router {
   const router = Router();
 
   router.post('/login', async (request: Request, response: Response, next) => {
@@ -27,6 +32,13 @@ export function createAuthRoutes(store: XmlStore, authMiddleware: RequestHandler
         response.status(401).json({ message: 'Invalid credentials, role, or inactive account.' });
         return;
       }
+
+      await auditLog.append({
+        action: 'LOGIN',
+        performedBy: user.userId,
+        targetUserId: user.userId,
+        details: `Successful login as ${user.role}`
+      });
 
       response.json({
         token: signToken(user),

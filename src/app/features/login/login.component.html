@@ -7,7 +7,7 @@
     <span class="switch-track" [class.dark]="(theme$ | async) === 'dark'">
       <span class="switch-thumb"></span>
     </span>
-    <span>{{ (theme$ | async) === 'dark' ? 'Dark mode' : 'Light mode' }}</span>
+    <span class="switch-label">{{ (theme$ | async) === 'dark' ? 'Dark' : 'Light' }}</span>
   </button>
 
   <div class="login-art">
