@@ -15,7 +15,7 @@ import { TaskStore } from './storage/task-store';
 
 const app = express();
 const port = Number(process.env['PORT'] ?? 3000);
-const dataDir = path.join(process.cwd(), 'server', 'data');
+const dataDir = path.join(process.cwd(), 'data');
 const dataFilePath = path.join(dataDir, 'users.xml');
 const store = new XmlStore(dataFilePath);
 const auditLog = new AuditLog(dataDir);
