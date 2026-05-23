@@ -1,0 +1,149 @@
+<section class="dashboard-page">
+  <div class="hero-band">
+    <div>
+      <span class="eyebrow">Logged in workspace</span>
+      <h1>{{ profile?.displayName || 'Loading user' }}</h1>
+      <p>{{ scope || 'Fetching profile and access-scoped records from the API.' }}</p>
+
+      <div class="hero-badges" aria-label="Session signals">
+        <span>Token active</span>
+        <span>{{ records.length || skeletonRows.length }} data lanes</span>
+        <span>{{ profile?.role || 'Role pending' }}</span>
+      </div>
+    </div>
+
+    <div class="hero-stack">
+      <div class="access-visual" aria-hidden="true">
+        <span class="node main">API</span>
+        <span class="node role">Role</span>
+        <span class="node records">Rows</span>
+        <span class="node admin">Admin</span>
+      </div>
+
+      <div class="delay-card">
+        <div class="delay-copy">
+          <span>API delay</span>
+          <strong>{{ delayMs }} ms</strong>
+        </div>
+        <input
+          type="range"
+          min="0"
+          max="4000"
+          step="200"
+          [value]="delayMs"
+          (input)="onDelayChange($event)"
+          aria-label="API delay in milliseconds">
+        <button class="btn" type="button" (click)="loadDashboard()" [disabled]="loading">Reload</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-grid">
+    <article class="status-tile">
+      <span>User ID</span>
+      <strong>{{ profile?.userId || '--' }}</strong>
+    </article>
+    <article class="status-tile">
+      <span>Role</span>
+      <strong>{{ profile?.role || '--' }}</strong>
+    </article>
+    <article class="status-tile">
+      <span>Department</span>
+      <strong>{{ profile?.department || '--' }}</strong>
+    </article>
+    <article class="status-tile">
+      <span>Access</span>
+      <strong>{{ profile?.accessLevel || '--' }}</strong>
+    </article>
+  </div>
+
+  <div class="flow-strip">
+    <div class="flow-step done">
+      <span></span>
+      <strong>Session</strong>
+    </div>
+    <div class="flow-line"></div>
+    <div class="flow-step" [class.done]="!loading">
+      <span></span>
+      <strong>Profile</strong>
+    </div>
+    <div class="flow-line"></div>
+    <div class="flow-step" [class.done]="records.length > 0">
+      <span></span>
+      <strong>Records</strong>
+    </div>
+  </div>
+
+  <div class="async-strip" *ngIf="loading">
+    <div class="pulse"></div>
+    <span>Waiting on delayed API response</span>
+    <strong>{{ elapsedMs }} ms</strong>
+  </div>
+
+  <div class="alert" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <section class="records-section">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Records</span>
+        <h2>Accessible data</h2>
+      </div>
+      <span class="tag">{{ records.length }} rows</span>
+    </div>
+
+    <div class="table-wrap" *ngIf="!loading; else loadingRows">
+      <table>
+        <thead>
+          <tr>
+            <th>Record</th>
+            <th>Category</th>
+            <th>Owner</th>
+            <th>Access Level</th>
+            <th>Status</th>
+            <th>Sensitivity</th>
+            <th>Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let record of records; trackBy: trackRecord" class="data-row">
+            <td>
+              <strong>{{ record.title }}</strong>
+              <span class="record-id">{{ record.id }}</span>
+            </td>
+            <td>{{ record.category }}</td>
+            <td>{{ record.ownerName }}</td>
+            <td><span class="tag">{{ record.accessLevel }}</span></td>
+            <td>{{ record.status }}</td>
+            <td>{{ record.sensitivity }}</td>
+            <td>{{ record.updatedAt | date: 'mediumDate' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #loadingRows>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Record</th>
+              <th>Category</th>
+              <th>Owner</th>
+              <th>Access Level</th>
+              <th>Status</th>
+              <th>Sensitivity</th>
+              <th>Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of skeletonRows">
+              <td colspan="7">
+                <span class="skeleton-line" [style.width.%]="76 + row * 4"></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ng-template>
+  </section>
+</section>

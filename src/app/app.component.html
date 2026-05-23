@@ -1,0 +1,38 @@
+<div class="app-shell">
+  <header class="topbar" *ngIf="currentUser$ | async as user">
+    <a class="brand" routerLink="/dashboard" aria-label="Role Access Workbench">
+      <span class="brand-mark">RA</span>
+      <span class="brand-copy">
+        <strong>Role Access</strong>
+        <span>Workbench</span>
+      </span>
+    </a>
+
+    <nav class="nav-links" aria-label="Primary">
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a *ngIf="isAdmin$ | async" routerLink="/admin/users" routerLinkActive="active">Users</a>
+    </nav>
+
+    <div class="user-strip">
+      <button
+        class="theme-switch"
+        type="button"
+        (click)="toggleTheme()"
+        [attr.aria-label]="(theme$ | async) === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
+        <span class="switch-track" [class.dark]="(theme$ | async) === 'dark'">
+          <span class="switch-thumb"></span>
+        </span>
+        <span class="switch-label">{{ (theme$ | async) === 'dark' ? 'Dark' : 'Light' }}</span>
+      </button>
+      <span class="tag" [class.admin]="user.role === 'Admin'" [class.general]="user.role === 'General User'">
+        {{ user.role }}
+      </span>
+      <span class="signed-in">{{ user.displayName }}</span>
+      <button class="btn secondary" type="button" (click)="logout()">Sign out</button>
+    </div>
+  </header>
+
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+</div>

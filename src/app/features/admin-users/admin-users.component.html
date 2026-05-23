@@ -1,0 +1,141 @@
+<section class="admin-page">
+  <div class="admin-heading">
+    <div>
+      <span class="eyebrow">Admin console</span>
+      <h1>User management</h1>
+      <p>Maintain dummy XML users, roles, departments, and active access.</p>
+
+      <div class="admin-stats">
+        <span>{{ users.length }} accounts</span>
+        <span>{{ delayMs }} ms delay</span>
+        <span>XML store</span>
+      </div>
+    </div>
+
+    <div class="delay-tools">
+      <label for="admin-delay">API delay</label>
+      <input
+        id="admin-delay"
+        type="range"
+        min="0"
+        max="4000"
+        step="200"
+        [value]="delayMs"
+        (input)="onDelayChange($event)">
+      <strong>{{ delayMs }} ms</strong>
+      <button class="btn secondary" type="button" (click)="loadUsers()" [disabled]="loading">Refresh</button>
+    </div>
+  </div>
+
+  <div class="alert" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <div class="admin-layout">
+    <form class="user-form panel" [formGroup]="form" (ngSubmit)="saveUser()">
+      <div class="form-heading">
+        <span class="eyebrow">{{ editingUser ? 'Edit user' : 'New user' }}</span>
+        <h2>{{ editingUser ? editingUser.displayName : 'Create account' }}</h2>
+      </div>
+
+      <div class="field-grid">
+        <div class="field">
+          <label for="managed-user-id">User ID</label>
+          <input id="managed-user-id" type="text" formControlName="userId">
+        </div>
+
+        <div class="field">
+          <label for="managed-name">Display Name</label>
+          <input id="managed-name" type="text" formControlName="displayName">
+        </div>
+
+        <div class="field">
+          <label for="managed-password">Password</label>
+          <input id="managed-password" type="password" formControlName="password" [placeholder]="editingUser ? 'Leave blank to keep current' : ''">
+        </div>
+
+        <div class="field">
+          <label for="managed-role">Role</label>
+          <div class="select-field">
+            <select id="managed-role" formControlName="role">
+              <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+            </select>
+            <span class="select-arrow" aria-hidden="true"></span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="managed-department">Department</label>
+          <input id="managed-department" type="text" formControlName="department">
+        </div>
+
+        <div class="field">
+          <label for="managed-access">Access Level</label>
+          <input id="managed-access" type="text" formControlName="accessLevel">
+        </div>
+      </div>
+
+      <label class="toggle-row">
+        <input type="checkbox" formControlName="active">
+        <span>Active account</span>
+      </label>
+
+      <div class="form-actions">
+        <button class="btn" type="submit" [disabled]="saving">{{ saving ? 'Saving...' : 'Save user' }}</button>
+        <button class="btn secondary" type="button" (click)="cancelEdit()">Clear</button>
+      </div>
+    </form>
+
+    <section class="user-list panel">
+      <div class="list-heading">
+        <div>
+          <span class="eyebrow">Database users</span>
+          <h2>{{ users.length }} accounts</h2>
+        </div>
+        <span class="tag" *ngIf="loading">Loading</span>
+      </div>
+
+      <div class="table-wrap" *ngIf="users.length; else emptyUsers">
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Role</th>
+              <th>Department</th>
+              <th>Access</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users; trackBy: trackUser">
+              <td>
+                <strong>{{ user.displayName }}</strong>
+                <span class="user-id">{{ user.userId }}</span>
+              </td>
+              <td>
+                <span class="tag" [class.admin]="user.role === 'Admin'" [class.general]="user.role === 'General User'">
+                  {{ user.role }}
+                </span>
+              </td>
+              <td>{{ user.department }}</td>
+              <td>{{ user.accessLevel }}</td>
+              <td>
+                <span class="status-dot" [class.off]="!user.active"></span>
+                {{ user.active ? 'Active' : 'Inactive' }}
+              </td>
+              <td>
+                <div class="row-actions">
+                  <button class="btn secondary" type="button" (click)="editUser(user)">Edit</button>
+                  <button class="btn danger" type="button" (click)="deleteUser(user)" [disabled]="isCurrentUser(user)">Delete</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #emptyUsers>
+        <div class="empty-state">{{ loading ? 'Loading users...' : 'No users found.' }}</div>
+      </ng-template>
+    </section>
+  </div>
+</section>

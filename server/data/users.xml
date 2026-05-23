@@ -1,0 +1,92 @@
+<database>
+  <users>
+    <user>
+      <id>usr-admin</id>
+      <userId>admin</userId>
+      <password>admin123</password>
+      <displayName>Mira Patel</displayName>
+      <role>Admin</role>
+      <department>Platform Operations</department>
+      <accessLevel>All records + user administration</accessLevel>
+      <active>true</active>
+      <createdAt>2026-05-01T08:00:00.000Z</createdAt>
+      <lastLoginAt>2026-05-23T06:04:21.875Z</lastLoginAt>
+    </user>
+    <user>
+      <id>usr-general</id>
+      <userId>general</userId>
+      <password>general123</password>
+      <displayName>Aarav Sharma</displayName>
+      <role>General User</role>
+      <department>Customer Success</department>
+      <accessLevel>Self + public</accessLevel>
+      <active>true</active>
+      <createdAt>2026-05-02T08:00:00.000Z</createdAt>
+      <lastLoginAt>2026-05-23T06:01:59.672Z</lastLoginAt>
+    </user>
+    <user>
+      <id>usr-analyst</id>
+      <userId>analyst</userId>
+      <password>analyst123</password>
+      <displayName>Leah Thompson</displayName>
+      <role>General User</role>
+      <department>Risk Analytics</department>
+      <accessLevel>Self + public</accessLevel>
+      <active>true</active>
+      <createdAt>2026-05-03T08:00:00.000Z</createdAt>
+      <lastLoginAt/>
+    </user>
+  </users>
+  <records>
+    <record>
+      <id>REC-1001</id>
+      <title>Regional onboarding queue</title>
+      <category>Operations</category>
+      <ownerUserId>general</ownerUserId>
+      <accessLevel>Owner</accessLevel>
+      <status>In review</status>
+      <sensitivity>Internal</sensitivity>
+      <updatedAt>2026-05-18T10:30:00.000Z</updatedAt>
+    </record>
+    <record>
+      <id>REC-1002</id>
+      <title>Escalation quality audit</title>
+      <category>Support</category>
+      <ownerUserId>general</ownerUserId>
+      <accessLevel>Owner</accessLevel>
+      <status>Open</status>
+      <sensitivity>Restricted</sensitivity>
+      <updatedAt>2026-05-19T11:15:00.000Z</updatedAt>
+    </record>
+    <record>
+      <id>REC-1003</id>
+      <title>Risk exception register</title>
+      <category>Risk</category>
+      <ownerUserId>analyst</ownerUserId>
+      <accessLevel>Owner</accessLevel>
+      <status>Monitoring</status>
+      <sensitivity>Confidential</sensitivity>
+      <updatedAt>2026-05-20T15:45:00.000Z</updatedAt>
+    </record>
+    <record>
+      <id>REC-1004</id>
+      <title>Service availability summary</title>
+      <category>Platform</category>
+      <ownerUserId>admin</ownerUserId>
+      <accessLevel>Public</accessLevel>
+      <status>Published</status>
+      <sensitivity>Public</sensitivity>
+      <updatedAt>2026-05-21T08:05:00.000Z</updatedAt>
+    </record>
+    <record>
+      <id>REC-1005</id>
+      <title>Admin access recertification</title>
+      <category>Security</category>
+      <ownerUserId>admin</ownerUserId>
+      <accessLevel>Admin</accessLevel>
+      <status>Scheduled</status>
+      <sensitivity>Highly Restricted</sensitivity>
+      <updatedAt>2026-05-22T07:20:00.000Z</updatedAt>
+    </record>
+  </records>
+</database>

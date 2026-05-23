@@ -1,0 +1,125 @@
+<section class="login-page">
+  <button
+    class="login-theme-switch"
+    type="button"
+    (click)="toggleTheme()"
+    [attr.aria-label]="(theme$ | async) === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
+    <span class="switch-track" [class.dark]="(theme$ | async) === 'dark'">
+      <span class="switch-thumb"></span>
+    </span>
+    <span>{{ (theme$ | async) === 'dark' ? 'Dark mode' : 'Light mode' }}</span>
+  </button>
+
+  <div class="login-art">
+    <img src="assets/access-map.svg" alt="Role based access map">
+    <div class="signal-board" aria-hidden="true">
+      <span>Auth</span>
+      <span>Scope</span>
+      <span>Delay</span>
+      <span>Admin</span>
+    </div>
+    <div class="art-caption">
+      <span>XML API</span>
+      <strong>Role-based records with async delay controls</strong>
+    </div>
+  </div>
+
+  <div class="login-panel">
+    <div class="login-card">
+      <div class="login-heading">
+        <span class="eyebrow">Secure workspace</span>
+        <h1>Role Access Workbench</h1>
+        <p>Sign in with a role to load scoped user records and admin tools.</p>
+      </div>
+
+      <div class="demo-switcher" aria-label="Demo accounts">
+        <button class="btn secondary" type="button" (click)="useDemo('General User')">General User</button>
+        <button class="btn secondary" type="button" (click)="useDemo('Admin')">Admin</button>
+      </div>
+
+      <form class="login-form" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="field">
+          <label for="userId">User ID</label>
+          <input id="userId" type="text" autocomplete="username" formControlName="userId">
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="password-field">
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              autocomplete="current-password"
+              formControlName="password">
+            <button
+              class="password-toggle"
+              type="button"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
+              {{ showPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="role">Role</label>
+          <div class="select-field">
+            <select id="role" formControlName="role">
+              <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+            </select>
+            <span class="select-arrow" aria-hidden="true"></span>
+          </div>
+        </div>
+
+        <div class="alert" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+        <button class="btn submit" type="submit" [disabled]="loading">
+          <span *ngIf="!loading">Sign in</span>
+          <span *ngIf="loading">Signing in...</span>
+        </button>
+
+        <section class="credentials-panel" aria-label="Demo credentials">
+          <div class="credentials-heading">
+            <strong>Demo credentials</strong>
+          </div>
+
+          <div class="credential-grid">
+            <article class="credential-card">
+              <div>
+                <span class="tag general">General User</span>
+                <dl>
+                  <div>
+                    <dt>User ID</dt>
+                    <dd>general</dd>
+                  </div>
+                  <div>
+                    <dt>Password</dt>
+                    <dd>general123</dd>
+                  </div>
+                </dl>
+              </div>
+              <button class="btn secondary" type="button" (click)="useDemo('General User')">Use</button>
+            </article>
+
+            <article class="credential-card">
+              <div>
+                <span class="tag admin">Admin</span>
+                <dl>
+                  <div>
+                    <dt>User ID</dt>
+                    <dd>admin</dd>
+                  </div>
+                  <div>
+                    <dt>Password</dt>
+                    <dd>admin123</dd>
+                  </div>
+                </dl>
+              </div>
+              <button class="btn secondary" type="button" (click)="useDemo('Admin')">Use</button>
+            </article>
+          </div>
+        </section>
+      </form>
+    </div>
+  </div>
+</section>
