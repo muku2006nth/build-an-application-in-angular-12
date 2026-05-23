@@ -62,6 +62,6 @@ app.use((error: Error, _request: Request, response: Response, _next: NextFunctio
   });
 });
 
-app.listen(port, '127.0.0.1', () => {
-  console.log(`Role Access API listening at http://127.0.0.1:${port}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Role Access API listening at http://0.0.0.0:${port}`);
 });
