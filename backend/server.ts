@@ -28,7 +28,9 @@ app.use(cors({
     'http://127.0.0.1:4200',
     'http://localhost:4200',
     'http://127.0.0.1:4201',
-    'http://localhost:4201'
+    'http://localhost:4201',
+    'https://build-an-application-in-angular-12.vercel.app',
+    'https://build-an-application-in-angular-12.vercel.app/'
   ]
 }));
 app.use(requestId);

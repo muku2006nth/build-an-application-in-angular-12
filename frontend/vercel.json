@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://your-backend-url.onrender.com/api/:path*"
+      "destination": "https://role-access-backend.onrender.com/api/:path*"
     },
     {
       "source": "/((?!api/).*)",
