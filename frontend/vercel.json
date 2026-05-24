@@ -1,4 +1,5 @@
 {
+  "outputDirectory": "dist/role-access-workbench/browser",
   "rewrites": [
     {
       "source": "/api/:path*",

@@ -10,7 +10,7 @@
       <accessLevel>All records + user administration</accessLevel>
       <active>true</active>
       <createdAt>2026-05-01T08:00:00.000Z</createdAt>
-      <lastLoginAt>2026-05-23T07:20:44.799Z</lastLoginAt>
+      <lastLoginAt>2026-05-23T10:36:40.853Z</lastLoginAt>
     </user>
     <user>
       <id>usr-general</id>
@@ -22,7 +22,7 @@
       <accessLevel>Self + public</accessLevel>
       <active>true</active>
       <createdAt>2026-05-02T08:00:00.000Z</createdAt>
-      <lastLoginAt>2026-05-23T06:01:59.672Z</lastLoginAt>
+      <lastLoginAt>2026-05-23T10:36:21.356Z</lastLoginAt>
     </user>
     <user>
       <id>usr-analyst</id>

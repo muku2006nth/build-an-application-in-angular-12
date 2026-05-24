@@ -6,5 +6,21 @@
     "performedBy": "admin",
     "targetUserId": "admin",
     "details": "Successful login as Admin"
+  },
+  {
+    "id": "aud-1779532581360-jjsop",
+    "timestamp": "2026-05-23T10:36:21.360Z",
+    "action": "LOGIN",
+    "performedBy": "general",
+    "targetUserId": "general",
+    "details": "Successful login as General User"
+  },
+  {
+    "id": "aud-1779532600856-wuic1",
+    "timestamp": "2026-05-23T10:36:40.856Z",
+    "action": "LOGIN",
+    "performedBy": "admin",
+    "targetUserId": "admin",
+    "details": "Successful login as Admin"
   }
 ]
