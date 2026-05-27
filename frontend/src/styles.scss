@@ -340,6 +340,12 @@ a {
   background: var(--teal-soft);
 }
 
+.tag.super-admin {
+  color: var(--berry);
+  border-color: color-mix(in srgb, var(--berry) 52%, var(--line));
+  background: var(--berry-soft);
+}
+
 .table-wrap {
   overflow-x: auto;
   border: 1px solid var(--line);

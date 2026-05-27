@@ -17,7 +17,7 @@ export class AuthService {
     map((session) => session?.user ?? null)
   );
   readonly isAdmin$: Observable<boolean> = this.currentUser$.pipe(
-    map((user) => user?.role === 'Admin')
+    map((user) => user?.role === 'Admin' || user?.role === 'Super Admin')
   );
 
   constructor(

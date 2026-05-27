@@ -20,7 +20,7 @@ export class LoginComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly themeService = inject(ThemeService);
 
-  readonly roles: UserRole[] = ['General User', 'Admin'];
+  readonly roles: UserRole[] = ['General User', 'Admin', 'Super Admin'];
   readonly theme$ = this.themeService.theme$;
   readonly form = this.formBuilder.nonNullable.group({
     userId: ['general', Validators.required],
@@ -33,10 +33,18 @@ export class LoginComponent {
   showPassword = false;
 
   useDemo(role: UserRole): void {
-    const isAdmin = role === 'Admin';
+    let userId = 'general';
+    let password = 'general123';
+    if (role === 'Admin') {
+      userId = 'admin';
+      password = 'admin123';
+    } else if (role === 'Super Admin') {
+      userId = 'superadmin';
+      password = 'superadmin123';
+    }
     this.form.setValue({
-      userId: isAdmin ? 'admin' : 'general',
-      password: isAdmin ? 'admin123' : 'general123',
+      userId,
+      password,
       role
     });
     this.errorMessage = '';

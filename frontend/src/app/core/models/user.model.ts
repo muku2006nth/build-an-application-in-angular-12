@@ -1,4 +1,4 @@
-export type UserRole = 'General User' | 'Admin';
+export type UserRole = 'General User' | 'Admin' | 'Super Admin';
 
 export interface LoginRequest {
   userId: string;

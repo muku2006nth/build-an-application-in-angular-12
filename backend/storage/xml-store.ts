@@ -88,7 +88,7 @@ export class XmlStore {
 
   async getRecordsFor(user: PublicUser): Promise<{ records: PublicRecord[]; scope: string }> {
     const database = await this.readDatabase();
-    const visibleRecords = user.role === 'Admin'
+    const visibleRecords = (user.role === 'Admin' || user.role === 'Super Admin')
       ? database.records
       : database.records.filter((record) => (
         record.ownerUserId === user.userId || record.accessLevel === 'Public'
@@ -96,7 +96,7 @@ export class XmlStore {
 
     return {
       records: visibleRecords.map((record) => this.toPublicRecord(record, database.users)),
-      scope: user.role === 'Admin'
+      scope: (user.role === 'Admin' || user.role === 'Super Admin')
         ? 'Admin view: all records in the XML database.'
         : 'General User view: owned records plus public records.'
     };
@@ -106,6 +106,10 @@ export class XmlStore {
     const database = await this.readDatabase();
     this.assertValidRole(payload.role);
     this.assertUserIsUnique(database.users, payload.userId);
+
+    if (payload.role === 'Super Admin') {
+      throw new Error('A new Super Admin cannot be created. There can be only one Super Admin.');
+    }
 
     const now = new Date().toISOString();
     const newUser: StoredUser = {
@@ -137,6 +141,14 @@ export class XmlStore {
 
     this.assertUserIsUnique(database.users.filter((candidate) => candidate.id !== id), payload.userId);
 
+    if (payload.role === 'Super Admin' && user.role !== 'Super Admin') {
+      throw new Error('Promoting a user to Super Admin is not allowed.');
+    }
+
+    if (user.role === 'Super Admin' && payload.role !== 'Super Admin') {
+      throw new Error('The Super Admin role cannot be demoted or changed.');
+    }
+
     user.userId = payload.userId.trim();
     user.displayName = payload.displayName.trim();
     user.role = payload.role;
@@ -154,6 +166,12 @@ export class XmlStore {
 
   async deleteUser(id: string): Promise<boolean> {
     const database = await this.readDatabase();
+    const userToDelete = database.users.find((candidate) => candidate.id === id);
+
+    if (userToDelete?.role === 'Super Admin') {
+      throw new Error('The Super Admin cannot be deleted.');
+    }
+
     const nextUsers = database.users.filter((candidate) => candidate.id !== id);
 
     if (nextUsers.length === database.users.length) {
@@ -220,8 +238,8 @@ export class XmlStore {
   }
 
   private assertValidRole(role: UserRole): void {
-    if (role !== 'General User' && role !== 'Admin') {
-      throw new Error('Role must be General User or Admin.');
+    if (role !== 'General User' && role !== 'Admin' && role !== 'Super Admin') {
+      throw new Error('Role must be General User, Admin, or Super Admin.');
     }
   }
 

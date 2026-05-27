@@ -24,7 +24,7 @@
         </span>
         <span class="switch-label">{{ (theme$ | async) === 'dark' ? 'Dark' : 'Light' }}</span>
       </button>
-      <span class="tag" [class.admin]="user.role === 'Admin'" [class.general]="user.role === 'General User'">
+      <span class="tag" [class.admin]="user.role === 'Admin'" [class.general]="user.role === 'General User'" [class.super-admin]="user.role === 'Super Admin'">
         {{ user.role }}
       </span>
       <span class="signed-in">{{ user.displayName }}</span>

@@ -17,6 +17,7 @@ export class RoleBadgePipe implements PipeTransform {
     switch (role) {
       case 'Admin':       return 'admin';
       case 'General User': return 'general';
+      case 'Super Admin':  return 'super-admin';
       default:            return '';
     }
   }

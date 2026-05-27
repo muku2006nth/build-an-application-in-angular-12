@@ -51,8 +51,8 @@ export function requireAdmin(
 ): void {
   const user = (request as AuthenticatedRequest).user;
 
-  if (user?.role !== 'Admin') {
-    response.status(403).json({ message: 'Admin role is required.' });
+  if (user?.role !== 'Admin' && user?.role !== 'Super Admin') {
+    response.status(403).json({ message: 'Admin or Super Admin role is required.' });
     return;
   }
 

@@ -45,6 +45,17 @@ export function createAdminRoutes(
       }
 
       const performer = (request as AuthenticatedRequest).user;
+
+      if ((payload.role as string) === 'Super Admin') {
+        response.status(400).json({ message: 'Creating an additional Super Admin is not allowed.' });
+        return;
+      }
+
+      if ((payload.role as string) === 'Admin' && (performer?.role as string) !== 'Super Admin') {
+        response.status(403).json({ message: 'Only the Super Admin can create Admin users.' });
+        return;
+      }
+
       const user = await store.createUser(payload as UserMutationPayload);
 
       await auditLog.append({
@@ -73,6 +84,36 @@ export function createAdminRoutes(
       }
 
       const performer = (request as AuthenticatedRequest).user;
+      const allUsers = await store.listUsers();
+      const existingUser = allUsers.find((u) => u.id === id);
+
+      if (!existingUser) {
+        response.status(404).json({ message: 'User not found.' });
+        return;
+      }
+
+      if ((existingUser.role as string) === 'Super Admin' && (performer?.role as string) !== 'Super Admin') {
+        response.status(403).json({ message: 'Standard Admins cannot modify the Super Admin account.' });
+        return;
+      }
+
+      if ((existingUser.role as string) !== (payload.role as string)) {
+        if ((performer?.role as string) !== 'Super Admin') {
+          response.status(403).json({ message: 'Only the Super Admin can change user roles.' });
+          return;
+        }
+
+        if ((payload.role as string) === 'Super Admin') {
+          response.status(400).json({ message: 'Promoting a user to Super Admin is not allowed.' });
+          return;
+        }
+
+        if ((existingUser.role as string) === 'Super Admin' && (payload.role as string) !== 'Super Admin') {
+          response.status(400).json({ message: 'The Super Admin role cannot be changed.' });
+          return;
+        }
+      }
+
       const user = await store.updateUser(id, payload as UserMutationPayload);
 
       if (!user) {
@@ -101,6 +142,24 @@ export function createAdminRoutes(
 
       if (performer?.id === id) {
         response.status(400).json({ message: 'The signed-in admin cannot delete their own account.' });
+        return;
+      }
+
+      const allUsers = await store.listUsers();
+      const existingUser = allUsers.find((u) => u.id === id);
+
+      if (!existingUser) {
+        response.status(404).json({ message: 'User not found.' });
+        return;
+      }
+
+      if ((existingUser.role as string) === 'Super Admin') {
+        response.status(400).json({ message: 'The Super Admin cannot be deleted.' });
+        return;
+      }
+
+      if ((existingUser.role as string) === 'Admin' && (performer?.role as string) !== 'Super Admin') {
+        response.status(403).json({ message: 'Standard Admins cannot delete other Admin accounts.' });
         return;
       }
 
@@ -179,8 +238,8 @@ function validateUserPayload(payload: Partial<UserMutationPayload>, passwordRequ
     return 'Password must be at least 6 characters.';
   }
 
-  if (payload.role !== 'General User' && payload.role !== 'Admin') {
-    return 'Role must be General User or Admin.';
+  if (payload.role !== 'General User' && payload.role !== 'Admin' && payload.role !== 'Super Admin') {
+    return 'Role must be General User, Admin, or Super Admin.';
   }
 
   if (!payload.department?.trim()) {

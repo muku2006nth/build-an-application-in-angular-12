@@ -47,7 +47,7 @@
     <article class="status-tile">
       <span>Role</span>
       <strong>
-        <span class="tag" [class.admin]="profile?.role === 'Admin'" [class.general]="profile?.role === 'General User'">
+        <span class="tag" [class.admin]="profile?.role === 'Admin'" [class.general]="profile?.role === 'General User'" [class.super-admin]="profile?.role === 'Super Admin'">
           {{ profile?.role || '--' }}
         </span>
       </strong>
@@ -95,9 +95,9 @@
   <div class="access-legend" *ngIf="!loading && profile">
     <div class="legend-icon" aria-hidden="true">🔐</div>
     <div class="legend-copy">
-      <strong>{{ profile.role === 'Admin' ? 'Admin view — all records' : 'General User view — scoped records' }}</strong>
-      <p *ngIf="profile.role !== 'Admin'">You see records you own plus any marked <em>Public</em>. Admins see the full dataset.</p>
-      <p *ngIf="profile.role === 'Admin'">You have full read access to every record in the XML database regardless of ownership or access level.</p>
+      <strong>{{ (profile.role === 'Admin' || profile.role === 'Super Admin') ? 'Admin view — all records' : 'General User view — scoped records' }}</strong>
+      <p *ngIf="profile.role !== 'Admin' && profile.role !== 'Super Admin'">You see records you own plus any marked <em>Public</em>. Admins see the full dataset.</p>
+      <p *ngIf="profile.role === 'Admin' || profile.role === 'Super Admin'">You have full read access to every record in the XML database regardless of ownership or access level.</p>
     </div>
   </div>
 
@@ -179,7 +179,7 @@
   </section>
 
   <!-- User/Employees section for the reviewer -->
-  <section class="users-section" *ngIf="profile?.role === 'Admin'">
+  <section class="users-section" *ngIf="profile?.role === 'Admin' || profile?.role === 'Super Admin'">
     <div class="section-heading">
       <div>
         <span class="eyebrow">Reviewer Quick-Access</span>
@@ -209,7 +209,7 @@
               <span class="user-id">{{ u.userId }}</span>
             </td>
             <td>
-              <span class="tag" [class.admin]="u.role === 'Admin'" [class.general]="u.role === 'General User'">
+              <span class="tag" [class.admin]="u.role === 'Admin'" [class.general]="u.role === 'General User'" [class.super-admin]="u.role === 'Super Admin'">
                 {{ u.role }}
               </span>
             </td>

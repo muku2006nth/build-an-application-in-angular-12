@@ -80,6 +80,7 @@
           <div class="select-field">
             <select id="managed-role" formControlName="role">
               <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+              <option *ngIf="editingUser?.role === 'Super Admin'" value="Super Admin">Super Admin</option>
             </select>
             <span class="select-arrow" aria-hidden="true"></span>
           </div>
@@ -149,7 +150,7 @@
                 <span class="user-id">{{ user.userId }}</span>
               </td>
               <td>
-                <span class="tag" [class.admin]="user.role === 'Admin'" [class.general]="user.role === 'General User'">
+                <span class="tag" [class.admin]="user.role === 'Admin'" [class.general]="user.role === 'General User'" [class.super-admin]="user.role === 'Super Admin'">
                   {{ user.role }}
                 </span>
               </td>

@@ -48,6 +48,7 @@ export class AdminUsersComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUsers();
+    this.updateRoleControlState();
   }
 
   setTab(tab: AdminTab): void {
@@ -102,6 +103,7 @@ export class AdminUsersComponent implements OnInit {
       accessLevel: user.accessLevel,
       active: user.active
     });
+    this.updateRoleControlState();
   }
 
   cancelEdit(): void {
@@ -115,6 +117,26 @@ export class AdminUsersComponent implements OnInit {
       accessLevel: 'Self + public',
       active: true
     });
+    this.updateRoleControlState();
+  }
+
+  isRoleDropdownEnabled(): boolean {
+    const currentUser = this.authService.currentUserSnapshot;
+    if (currentUser?.role !== 'Super Admin') {
+      return false;
+    }
+    if (this.editingUser && this.editingUser.role === 'Super Admin') {
+      return false;
+    }
+    return true;
+  }
+
+  private updateRoleControlState(): void {
+    if (this.isRoleDropdownEnabled()) {
+      this.form.controls.role.enable();
+    } else {
+      this.form.controls.role.disable();
+    }
   }
 
   saveUser(): void {

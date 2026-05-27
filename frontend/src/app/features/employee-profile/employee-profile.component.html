@@ -8,7 +8,7 @@
       </button>
 
       <div class="hero-inner">
-        <div class="avatar" [class.admin]="p.user.role === 'Admin'" aria-hidden="true">
+        <div class="avatar" [class.admin]="p.user.role === 'Admin'" [class.super-admin]="p.user.role === 'Super Admin'" aria-hidden="true">
           {{ p.user.displayName.charAt(0).toUpperCase() }}
         </div>
 
@@ -16,7 +16,7 @@
           <span class="eyebrow">Employee Profile</span>
           <h1>{{ p.user.displayName }}</h1>
           <div class="hero-meta">
-            <span class="tag" [class.admin]="p.user.role === 'Admin'" [class.general]="p.user.role === 'General User'">
+            <span class="tag" [class.admin]="p.user.role === 'Admin'" [class.general]="p.user.role === 'General User'" [class.super-admin]="p.user.role === 'Super Admin'">
               {{ p.user.role }}
             </span>
             <span class="meta-item">📁 {{ p.user.department }}</span>

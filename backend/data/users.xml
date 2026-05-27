@@ -1,6 +1,18 @@
 <database>
   <users>
     <user>
+      <id>usr-superadmin</id>
+      <userId>superadmin</userId>
+      <password>superadmin123</password>
+      <displayName>Super Admin</displayName>
+      <role>Super Admin</role>
+      <department>Security Administration</department>
+      <accessLevel>All records + role administration</accessLevel>
+      <active>true</active>
+      <createdAt>2026-05-27T10:00:00.000Z</createdAt>
+      <lastLoginAt></lastLoginAt>
+    </user>
+    <user>
       <id>usr-admin</id>
       <userId>admin</userId>
       <password>admin123</password>

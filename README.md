@@ -53,6 +53,7 @@ The frontend Angular SPA serves the beautiful client-side views and user directo
 
 | Role | User ID | Password | Access Rights |
 |---|---|---|---|
-| **Admin** | `admin` | `admin123` | Full access to records, full user management CRUD, audit logs, and employee performance profiles. |
+| **Super Admin** | `superadmin` | `superadmin123` | Full access to records, full user management CRUD, audit logs, employee profiles, and **sole authorization to change user roles**. |
+| **Admin** | `admin` | `admin123` | Full access to records, user management CRUD (details only, roles disabled), audit logs, and employee performance profiles. |
 | **General User** | `general` | `general123` | Scoped read access (can only view owned records plus public records). |
 | **General User** | `analyst` | `analyst123` | Scoped read access (can only view owned records plus public records). |
